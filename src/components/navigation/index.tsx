@@ -3,6 +3,7 @@ import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 
 export default function Navigation({ className }: { className?: string }) {
+  //TODO: make responsive
   return (
     <nav
       className={cn(
@@ -11,17 +12,17 @@ export default function Navigation({ className }: { className?: string }) {
       )}
     >
       <Button asChild variant="link" size="lg">
-        <Link to="/" className="text-lg [&.active]:font-bold">
+        <Link to="/" className="text-xl [&.active]:font-bold">
           Home
         </Link>
       </Button>
       <Button asChild variant="link" size="lg">
-        <Link to="/expenses" className="text-lg [&.active]:font-bold">
+        <Link to="/expenses" className="text-xl [&.active]:font-bold">
           Expenses
         </Link>
       </Button>
       <Button asChild variant="link" size="lg">
-        <Link to="/expenses/new" className="text-lg [&.active]:font-bold">
+        <Link to="/expenses/new" className="text-xl [&.active]:font-bold">
           New Expense
         </Link>
       </Button>

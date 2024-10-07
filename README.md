@@ -1,9 +1,11 @@
 # Expense Tracker App
 
-## Startup
+## Setup and Run
 
+- clone git repo `git clone https://github.com/olzhas-kalikhan/expense-tracker.git`
+- change current directory `cd expense-tracker`
 - Install dependencies `npm install`
-- Local startup `npm run dev`
+- Local run `npm run dev`
 - Build `npm run build`
 - Preview build `npm run preview`
 

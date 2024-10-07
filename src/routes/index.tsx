@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 flex-wrap">
       <div className="flex w-[400px] flex-col flex-wrap gap-2 border p-4">
         <span className="rounded border p-2 text-sm">All Time</span>
         <ExpensesPieChart />
