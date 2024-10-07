@@ -1,7 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
 import { faker } from "@faker-js/faker";
-import { type RootState } from ".";
 
 export const EXPENSE_TYPES = [
   "property",
@@ -21,6 +19,10 @@ export type ExpenseRecord = {
   notes: string;
 };
 
+export type ExpensesState = {
+  records: ExpenseRecord[];
+};
+
 const createExpenseThunk = createAsyncThunk(
   "expenses/records/create",
   async (expenseRecord: Omit<ExpenseRecord, "createdAt" | "id">) => {
@@ -35,7 +37,7 @@ const createExpenseThunk = createAsyncThunk(
 const updateExpenseThunk = createAsyncThunk(
   "expenses/records/update",
   async (expenseRecord: Omit<ExpenseRecord, "createdAt">, { getState }) => {
-    const state = getState() as RootState;
+    const state = getState() as { expenses: ExpensesState };
     const existingRecord = state.expenses.records.find(
       (record) => record.id === expenseRecord.id,
     );
@@ -57,32 +59,25 @@ const deleteExpenseThunk = createAsyncThunk(
 // for demo purposes
 const generateExpenses = (count: number): ExpenseRecord[] => {
   return Array.from({ length: count }).map<ExpenseRecord>(() => {
+    const createdAt = faker.date
+      .between({
+        from: "2020-01-01T00:00:00.000Z",
+        to: new Date(),
+      })
+      .toISOString();
+
     return {
       id: crypto.randomUUID(),
       type: faker.helpers.arrayElement(EXPENSE_TYPES),
       amount: faker.helpers.rangeToNumber({ min: 10, max: 10000 }),
-      createdAt: faker.date
-        .between({
-          from: "2022-01-01T00:00:00.000Z",
-          to: new Date(),
-        })
-        .toISOString(),
-      date: faker.date
-        .between({
-          from: "2022-01-01T00:00:00.000Z",
-          to: new Date(),
-        })
-        .toISOString(),
+      createdAt: createdAt,
+      date: createdAt,
       notes: faker.lorem.words(3),
     };
   });
 };
 
-export interface expensesState {
-  records: ExpenseRecord[];
-}
-
-const initialState: expensesState = {
+const initialState: ExpensesState = {
   records: generateExpenses(1000),
 };
 

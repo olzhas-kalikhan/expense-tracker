@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ExpenseForm from "~/components/expense-form";
-import { expenseSelectors, useAppSelector } from "~/store";
+import { expenseSelectors } from "~/selectors";
+import { useAppSelector } from "~/store";
 
 export const Route = createFileRoute("/expenses/$expenseId")({
   component: RouteComponent,

@@ -19,12 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { expenseSelectors, useAppDispatch, useAppSelector } from "~/store";
+import { useAppDispatch, useAppSelector } from "~/store";
 import { ExpenseRecord, expensesActions } from "~/store/expenses";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { HeaderCell } from "~/components/data-table/header-cell";
 import { dateSortingFn } from "~/components/data-table/utils";
+import { expenseSelectors } from "~/selectors";
 
 const expensesSearchSchema = z.object({
   page: fallback(z.number(), 1).default(1),
