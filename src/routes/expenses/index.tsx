@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { zodSearchValidator } from "@tanstack/router-zod-adapter";
+import { fallback, zodSearchValidator } from "@tanstack/router-zod-adapter";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { DataTablePagination } from "~/components/data-table/pagination";
@@ -18,14 +19,20 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { expenseSelectors, useAppSelector } from "~/store";
-import { ExpenseRecord } from "~/store/expenses";
-import { Pencil, Trash2 } from "lucide-react";
+import { expenseSelectors, useAppDispatch, useAppSelector } from "~/store";
+import { ExpenseRecord, expensesActions } from "~/store/expenses";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { z } from "zod";
+import { HeaderCell } from "~/components/data-table/header-cell";
+import { dateSortingFn } from "~/components/data-table/utils";
 
 const expensesSearchSchema = z.object({
-  page: z.number().default(1),
-  pageSize: z.number().default(50),
+  page: fallback(z.number(), 1).default(1),
+  pageSize: fallback(z.number(), 50).default(50),
+  sort: fallback(
+    z.array(z.object({ id: z.string(), desc: z.boolean() })),
+    [],
+  ).default([]),
 });
 
 export const Route = createFileRoute("/expenses/")({
@@ -35,6 +42,22 @@ export const Route = createFileRoute("/expenses/")({
   },
   validateSearch: zodSearchValidator(expensesSearchSchema),
 });
+
+const DeleteExpenseButton = ({ id }: { id: ExpenseRecord["id"] }) => {
+  const dispatch = useAppDispatch();
+
+  return (
+    <Button
+      size="icon"
+      variant="destructive"
+      onClick={async () => {
+        await dispatch(expensesActions.deleteExpense(id));
+      }}
+    >
+      <Trash2 />
+    </Button>
+  );
+};
 
 const columns: ColumnDef<ExpenseRecord>[] = [
   {
@@ -71,9 +94,16 @@ const columns: ColumnDef<ExpenseRecord>[] = [
   { accessorKey: "amount", header: "Amount" },
   { accessorKey: "notes", header: "Notes" },
   {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ getValue }) => new Date(getValue() as string).toLocaleDateString(),
+    sortingFn: dateSortingFn,
+  },
+  {
     accessorKey: "date",
     header: "Date",
     cell: ({ getValue }) => new Date(getValue() as string).toLocaleDateString(),
+    sortingFn: dateSortingFn,
   },
 
   {
@@ -82,13 +112,15 @@ const columns: ColumnDef<ExpenseRecord>[] = [
     cell: ({ row }) => (
       <div className="flex gap-3">
         <Button size="icon" variant="secondary" asChild>
-          <Link to="/expenses/$expenseId" params={{ expenseId: row.id }}>
+          <Link
+            to="/expenses/$expenseId"
+            params={{ expenseId: row.id }}
+            search={(p) => p}
+          >
             <Pencil />
           </Link>
         </Button>
-        <Button size="icon" variant="destructive">
-          <Trash2 />
-        </Button>
+        <DeleteExpenseButton id={row.id} />
       </div>
     ),
   },
@@ -96,19 +128,33 @@ const columns: ColumnDef<ExpenseRecord>[] = [
 
 export function RouteComponent() {
   const expenseRecords = useAppSelector(expenseSelectors.records);
-  const { page, pageSize } = Route.useSearch();
+  const { page, pageSize, sort } = Route.useSearch();
   const table = useReactTable({
     data: expenseRecords,
     columns,
     getRowId: (row) => row.id,
-    state: { pagination: { pageSize: pageSize, pageIndex: page - 1 } },
+    state: {
+      pagination: { pageSize: pageSize, pageIndex: page - 1 },
+      sorting: sort,
+    },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
     <div className="flex h-[80vh] flex-col">
-      <Button className="self-end">New Record</Button>
+      <div className="flex justify-end gap-4 py-2">
+        <Button asChild>
+          <Link to="/expenses/new" search={(prev) => prev}>
+            Add New Expense
+          </Link>
+        </Button>
+        <Button size="icon" variant="secondary">
+          {/* Placeholder for extra options*/}
+          <MoreVertical />
+        </Button>
+      </div>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -116,12 +162,7 @@ export function RouteComponent() {
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                    {header.isPlaceholder ? null : <HeaderCell {...header} />}
                   </TableHead>
                 );
               })}

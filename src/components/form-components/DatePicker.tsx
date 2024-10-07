@@ -17,14 +17,19 @@ export const FormDatePicker = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   label,
+  formItemProps,
   ...props
 }: Omit<ControllerProps<TFieldValues, TName>, "render"> & {
   label: string;
+  formItemProps?: React.ComponentProps<typeof FormItem>;
 }) => {
   return (
     <FormField<TFieldValues, TName>
       render={({ field }) => (
-        <FormItem className="flex flex-col gap-1.5">
+        <FormItem
+          {...formItemProps}
+          className={cn("flex flex-col gap-1.5", formItemProps?.className)}
+        >
           <FormLabel className="pt-1">{label}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
@@ -32,7 +37,7 @@ export const FormDatePicker = <
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-[240px] pl-3 text-left font-normal",
+                    "w-full pl-3 text-left font-normal",
                     !field.value && "text-muted-foreground",
                   )}
                 >

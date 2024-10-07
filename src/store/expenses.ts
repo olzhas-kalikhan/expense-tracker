@@ -1,6 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { faker } from "@faker-js/faker";
+import { type RootState } from ".";
 
 export const EXPENSE_TYPES = [
   "property",
@@ -20,6 +21,40 @@ export type ExpenseRecord = {
   notes: string;
 };
 
+const createExpenseThunk = createAsyncThunk(
+  "expenses/records/create",
+  async (expenseRecord: Omit<ExpenseRecord, "createdAt" | "id">) => {
+    return Promise.resolve<ExpenseRecord>({
+      ...expenseRecord,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    });
+  },
+);
+
+const updateExpenseThunk = createAsyncThunk(
+  "expenses/records/update",
+  async (expenseRecord: Omit<ExpenseRecord, "createdAt">, { getState }) => {
+    const state = getState() as RootState;
+    const existingRecord = state.expenses.records.find(
+      (record) => record.id === expenseRecord.id,
+    );
+    if (!existingRecord) throw new Error("Record does not exist");
+
+    return Promise.resolve<ExpenseRecord>({
+      ...existingRecord,
+      ...expenseRecord,
+    });
+  },
+);
+
+const deleteExpenseThunk = createAsyncThunk(
+  "expenses/records/delete",
+  async (expenseRecordId: ExpenseRecord["id"]) => {
+    return Promise.resolve<ExpenseRecord["id"]>(expenseRecordId);
+  },
+);
+// for demo purposes
 const generateExpenses = (count: number): ExpenseRecord[] => {
   return Array.from({ length: count }).map<ExpenseRecord>(() => {
     return {
@@ -54,33 +89,30 @@ const initialState: expensesState = {
 export const expensesSlice = createSlice({
   name: "counter",
   initialState,
-  reducers: {
-    addExpense: (
-      state,
-      action: PayloadAction<Omit<ExpenseRecord, "createdAt">>,
-    ) => {
-      state.records.push({
-        ...action.payload,
-        createdAt: new Date().toISOString(),
-      });
-    },
-    removeExpense: (state, action: PayloadAction<ExpenseRecord["id"]>) => {
-      state.records = state.records.filter(
-        (record) => record.id !== action.payload,
-      );
-    },
-    updateExpense: (
-      state,
-      action: PayloadAction<Omit<ExpenseRecord, "createdAt">>,
-    ) => {
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(createExpenseThunk.fulfilled, (state, action) => {
+      state.records.push(action.payload);
+    });
+    builder.addCase(updateExpenseThunk.fulfilled, (state, action) => {
       const index = state.records.findIndex(
         (record) => record.id === action.payload.id,
       );
-      state.records[index] = { ...state.records[index], ...action.payload };
-    },
+      state.records[index] = action.payload;
+    });
+    builder.addCase(deleteExpenseThunk.fulfilled, (state, action) => {
+      state.records = state.records.filter(
+        (record) => record.id !== action.payload,
+      );
+    });
   },
 });
 // Action creators are generated for each case reducer function
-export const expensesActions = expensesSlice.actions;
+export const expensesActions = {
+  ...expensesSlice.actions,
+  createExpense: createExpenseThunk,
+  updateExpense: updateExpenseThunk,
+  deleteExpense: deleteExpenseThunk,
+};
 
 export default expensesSlice.reducer;

@@ -1,4 +1,4 @@
-import { useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,10 +12,11 @@ export default function Breadcrumbs({ className }: { className?: string }) {
   const matches = useRouterState({ select: (s) => s.matches });
 
   const breadcrumbs = matches
-    .map(({ pathname, context }) => {
+    .map(({ pathname, context, search }) => {
       return {
         title: context.getTitle?.(),
         path: pathname,
+        search,
       };
     })
     .filter(({ title }) => title);
@@ -23,12 +24,16 @@ export default function Breadcrumbs({ className }: { className?: string }) {
   return (
     <Breadcrumb className={className}>
       <BreadcrumbList>
-        {breadcrumbs.map(({ title, path }, i) => {
+        {breadcrumbs.map(({ title, path, search }, i) => {
           if (!title) return null;
           return (
             <React.Fragment key={path}>
               <BreadcrumbItem>
-                <BreadcrumbLink href={path}>{title}</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link to={path} search={search}>
+                    {title}
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               {i !== breadcrumbs.length - 1 && <BreadcrumbSeparator />}
             </React.Fragment>

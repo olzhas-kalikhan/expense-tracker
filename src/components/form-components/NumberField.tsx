@@ -1,3 +1,5 @@
+import { type NumericFormatProps, NumericFormat } from "react-number-format";
+
 import { ControllerProps, FieldPath, FieldValues } from "react-hook-form";
 import {
   FormControl,
@@ -8,24 +10,31 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 
-export const FormTextField = <
+export const FormNumberField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   label,
-  formItemProps,
+  numberInputProps,
   ...props
 }: Omit<ControllerProps<TFieldValues, TName>, "render"> & {
-  formItemProps?: React.ComponentProps<typeof FormItem>;
   label: string;
+  numberInputProps?: NumericFormatProps;
 }) => {
   return (
     <FormField
-      render={({ field }) => (
-        <FormItem {...formItemProps}>
+      render={({ field: { onChange, ...field } }) => (
+        <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input placeholder={label} {...field} />
+            <NumericFormat
+              customInput={Input}
+              onValueChange={({ floatValue }) => {
+                onChange(floatValue);
+              }}
+              {...field}
+              {...numberInputProps}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

@@ -20,6 +20,11 @@ export default function Navigation({ className }: { className?: string }) {
           Expenses
         </Link>
       </Button>
+      <Button asChild variant="link" size="lg">
+        <Link to="/expenses/new" className="text-lg [&.active]:font-bold">
+          New Expense
+        </Link>
+      </Button>
     </nav>
   );
 }

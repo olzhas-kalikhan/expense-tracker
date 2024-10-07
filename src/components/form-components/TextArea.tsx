@@ -6,9 +6,9 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
-export const FormTextField = <
+export const FormTextArea = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -25,7 +25,7 @@ export const FormTextField = <
         <FormItem {...formItemProps}>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input placeholder={label} {...field} />
+            <Textarea placeholder={label} {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>
