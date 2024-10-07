@@ -7,22 +7,23 @@
 - Build `npm run build`
 - Preview build `npm run preview`
 
-## Tools
+## Core Tools
 
 - TypeScript
 - Vite
 - React
+- @tanstack/react-router
 
 ## Libs
 
 - react-hook-form
-- @tanstack/react-router
 - @tanstack/react-table
+- ChartJS + react-chartjs-2
 
 ## Styling
 
 - TailwindCSS
-- shadcn-ui
+- shadcn-ui (radix-ui)
 
 ## Assumptions
 

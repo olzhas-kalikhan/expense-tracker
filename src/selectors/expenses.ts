@@ -83,19 +83,3 @@ export const groupedByMonthAndTypeRecords = createAppSelector(
     }, recordsByMonthByTypeMap);
   },
 );
-
-export const minMaxRecordDate = createAppSelector([records], (records) => {
-  if (records.length === 0) return { min: null, max: null };
-  let min = records[0].date;
-  let max = records[0].date;
-
-  records.forEach((record) => {
-    if (isAfter(min, record.date)) {
-      min = record.date;
-    }
-    if (isBefore(max, record.date)) {
-      max = record.date;
-    }
-  });
-  return { min, max };
-});
